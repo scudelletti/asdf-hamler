@@ -55,7 +55,7 @@ download_release() {
   if [ "$ARCHITECTURE" = "darwin" ]; then
     url="https://s3-us-west-2.amazonaws.com/packages.emqx.io/hamler/homebrew/hamler-${version}.tgz"
   else
-    url="$GH_REPO/archive/v${version}.tar.gz"
+    url="$GH_REPO/releases/download/${version}/hamler-${version}.tgz"
   fi
 
   echo "* Downloading hamler release $version..."
@@ -76,7 +76,7 @@ install_version() {
   (
     mkdir -p "$install_path"
     download_release "$version" "$release_file"
-    tar -xzf "$release_file" -C "$install_path" --strip-components=1 || fail "Could not extract $release_file"
+    tar -xf "$release_file" -C "$install_path" --strip-components=1 || fail "Could not extract $release_file"
     rm "$release_file"
 
     # Create link for lib
