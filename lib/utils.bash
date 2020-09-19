@@ -5,6 +5,10 @@ set -euo pipefail
 # TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for hamler.
 GH_REPO="https://github.com/hamler-lang/hamler"
 
+get_architecture() {
+  uname | tr '[:upper:]' '[:lower:]'
+}
+
 fail() {
   echo -e "asdf-hamler: $*"
   exit 1
@@ -35,12 +39,16 @@ list_all_versions() {
 }
 
 download_release() {
-  local version filename url
+  local version filename url architecture
   version="$1"
   filename="$2"
+  architecture=$(get_architecture)
 
-  # TODO: Adapt the release URL convention for hamler
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  if [ "$architecture" = "darwin" ]; then
+    url="https://s3-us-west-2.amazonaws.com/packages.emqx.io/hamler/homebrew/hamler-${version}.tgz"
+  else
+    url="$GH_REPO/archive/v${version}.tar.gz"
+  fi
 
   echo "* Downloading hamler release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -56,7 +64,8 @@ install_version() {
   fi
 
   # TODO: Adapt this to proper extension and adapt extracting strategy.
-  local release_file="$install_path/hamler-$version.tar.gz"
+  local release_file="$install_path/hamler-$version.tgz"
+
   (
     mkdir -p "$install_path"
     download_release "$version" "$release_file"
