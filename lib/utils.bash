@@ -2,21 +2,32 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for hamler.
 GH_REPO="https://github.com/hamler-lang/hamler"
 
 get_architecture() {
   uname | tr '[:upper:]' '[:lower:]'
 }
 
+ARCHITECTURE=$(get_architecture)
+
+if [ "$ARCHITECTURE" = "darwin" ]; then
+  HAMLER_LIB_LOCATION="/usr/local/lib/hamler"
+else
+  HAMLER_LIB_LOCATION="/usr/lib/hamler"
+fi
+
 fail() {
   echo -e "asdf-hamler: $*"
   exit 1
 }
 
+unlink_lib_folder() {
+  unlink $HAMLER_LIB_LOCATION &> /dev/null
+  true
+}
+
 curl_opts=(-fsSL)
 
-# NOTE: You might want to remove this if hamler is not hosted on GitHub releases.
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
   curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
 fi
@@ -28,23 +39,20 @@ sort_versions() {
 
 list_github_tags() {
   git ls-remote --tags --refs "$GH_REPO" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
+    grep -o 'refs/tags/.*' | cut -d/ -f3- | grep v |
     sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if hamler has other means of determining installable versions.
   list_github_tags
 }
 
 download_release() {
-  local version filename url architecture
+  local version filename url
   version="$1"
   filename="$2"
-  architecture=$(get_architecture)
 
-  if [ "$architecture" = "darwin" ]; then
+  if [ "$ARCHITECTURE" = "darwin" ]; then
     url="https://s3-us-west-2.amazonaws.com/packages.emqx.io/hamler/homebrew/hamler-${version}.tgz"
   else
     url="$GH_REPO/archive/v${version}.tar.gz"
@@ -63,7 +71,6 @@ install_version() {
     fail "asdf-hamler supports release installs only"
   fi
 
-  # TODO: Adapt this to proper extension and adapt extracting strategy.
   local release_file="$install_path/hamler-$version.tgz"
 
   (
@@ -72,14 +79,18 @@ install_version() {
     tar -xzf "$release_file" -C "$install_path" --strip-components=1 || fail "Could not extract $release_file"
     rm "$release_file"
 
-    # TODO: Asert hamler executable exists.
-    local tool_cmd
-    tool_cmd="$(echo "hamler --version" | cut -d' ' -f2-)"
-    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
+    # Create link for lib
+    unlink_lib_folder
+    ln -s "$install_path" $HAMLER_LIB_LOCATION
 
+    local tool_cmd
+    tool_cmd="hamler"
+    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
     echo "hamler $version installation was successful!"
   ) || (
+    unlink_lib_folder
     rm -rf "$install_path"
+
     fail "An error ocurred while installing hamler $version."
   )
 }
