@@ -14,7 +14,13 @@ if [ "$ARCHITECTURE" = "darwin" ]; then
   HAMLER_LIB_LOCATION="/usr/local/lib/hamler"
 else
   HAMLER_LIB_LOCATION="/usr/lib/hamler"
+
+  if [ -n "${GITHUB_API_TOKEN:-}" ]; then
+    curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
+  fi
 fi
+
+curl_opts=(-fsSL)
 
 fail() {
   echo -e "asdf-hamler: $*"
@@ -25,12 +31,6 @@ unlink_lib_folder() {
   unlink $HAMLER_LIB_LOCATION &> /dev/null
   true
 }
-
-curl_opts=(-fsSL)
-
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-  curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
-fi
 
 sort_versions() {
   sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
