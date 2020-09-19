@@ -28,7 +28,7 @@ fail() {
 }
 
 unlink_lib_folder() {
-  unlink $HAMLER_LIB_LOCATION &> /dev/null
+  unlink $HAMLER_LIB_LOCATION &>/dev/null
   true
 }
 
