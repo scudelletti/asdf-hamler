@@ -10,11 +10,7 @@ get_architecture() {
 
 ARCHITECTURE=$(get_architecture)
 
-if [ "$ARCHITECTURE" = "darwin" ]; then
-  HAMLER_LIB_LOCATION="/usr/local/lib/hamler"
-else
-  HAMLER_LIB_LOCATION="/usr/lib/hamler"
-
+if [ "$ARCHITECTURE" = "linux" ]; then
   if [ -n "${GITHUB_API_TOKEN:-}" ]; then
     curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
   fi
@@ -25,11 +21,6 @@ curl_opts=(-fsSL)
 fail() {
   echo -e "asdf-hamler: $*"
   exit 1
-}
-
-unlink_lib_folder() {
-  unlink $HAMLER_LIB_LOCATION &>/dev/null
-  true
 }
 
 sort_versions() {
@@ -79,16 +70,11 @@ install_version() {
     tar -xf "$release_file" -C "$install_path" --strip-components=1 || fail "Could not extract $release_file"
     rm "$release_file"
 
-    # Create link for lib
-    unlink_lib_folder
-    ln -s "$install_path" $HAMLER_LIB_LOCATION
-
     local tool_cmd
     tool_cmd="hamler"
     test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
     echo "hamler $version installation was successful!"
   ) || (
-    unlink_lib_folder
     rm -rf "$install_path"
 
     fail "An error ocurred while installing hamler $version."
