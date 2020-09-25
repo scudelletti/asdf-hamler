@@ -22,7 +22,7 @@
 Plugin:
 
 ```shell
-asdf plugin add https://github.com/scudelletti/asdf-hamler.git
+asdf plugin-add hamler https://github.com/scudelletti/asdf-hamler.git
 ```
 
 hamler:
