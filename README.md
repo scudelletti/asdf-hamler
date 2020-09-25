@@ -43,6 +43,9 @@ asdf global hamler latest
 hamler --version
 ```
 
+Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to
+install & manage versions.
+
 # Notes:
 
 Versions lower than `0.2.2` rely in fixed lib directory outside the asdf installation. So you'll need to link them manually.
@@ -50,9 +53,6 @@ Versions lower than `0.2.2` rely in fixed lib directory outside the asdf install
 More specifically:
 * Linux: `/usr/lib/hamler`
 * MacOS: `/usr/local/lib/hamler`
-
-Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to
-install & manage versions.
 
 # Contributing
 
