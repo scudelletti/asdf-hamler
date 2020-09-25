@@ -22,8 +22,6 @@
 Plugin:
 
 ```shell
-asdf plugin add hamler
-# or
 asdf plugin add https://github.com/scudelletti/asdf-hamler.git
 ```
 
