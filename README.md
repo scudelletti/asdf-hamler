@@ -32,10 +32,10 @@ hamler:
 asdf list-all hamler
 
 # Install specific version
-asdf install hamler latest
+asdf install hamler 0.2.2
 
 # Set a version globally (on your ~/.tool-versions file)
-asdf global hamler latest
+asdf global hamler 0.2.2
 
 # Now hamler commands are available
 hamler --version
