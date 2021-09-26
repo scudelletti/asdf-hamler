@@ -30,8 +30,8 @@ sort_versions() {
 
 list_github_tags() {
   git ls-remote --tags --refs "$GH_REPO" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- | grep v |
-    sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+    grep -o 'refs/tags/.*' | cut -d/ -f3- |
+    grep -v v
 }
 
 list_all_versions() {
@@ -44,7 +44,7 @@ download_release() {
   filename="$2"
 
   if [ "$ARCHITECTURE" = "darwin" ]; then
-    url="https://s3-us-west-2.amazonaws.com/packages.emqx.io/hamler/homebrew/hamler-${version}.tgz"
+    url="https://s3-us-west-2.amazonaws.com/packages.emqx/hamler/homebrew/hamler-${version}.tgz"
   else
     url="$GH_REPO/releases/download/${version}/hamler-${version}.tgz"
   fi
